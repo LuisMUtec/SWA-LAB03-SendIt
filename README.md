@@ -104,7 +104,9 @@ distinto. **Cada afirmación ocurre una sola vez, en su altitud.**
 | **E** — escalar | [`redale/E-escalar/`](redale/E-escalar/README.md) | Qué cambia y dónde aparece el cuello de botella al subir la carga, por tramos |
 | Bitácora | [`redale/ITERACIONES.md`](redale/ITERACIONES.md) | Qué cambió, en qué paso, qué lo forzó y qué quedó afirmando lo viejo aguas abajo |
 | EVAL — aparato | [`evals/README.md`](evals/README.md) | Cómo se puntúa el backlog: rúbrica, protocolo, techos y las reglas de redacción que exige |
-| EVAL — corridas | [`evals/iterations/`](evals/iterations/) · [`evals/HISTORY.md`](evals/HISTORY.md) | Qué puntaje sacó qué SHA, y qué hallazgo produjo cada deducción |
+| EVAL — la vara | [`evals/rubric.json`](evals/rubric.json) · [`evals/rubric-lock.sh`](evals/rubric-lock.sh) | La rúbrica compilada —cuánto vale cada cosa, en qué orden se aplican las reglas— y el lock que la vuelve comprobable entre rondas |
+| EVAL — el instrumento | [`evals/RUIDO.md`](evals/RUIDO.md) | Cuánto se mueve el puntaje cuando el backlog no se movió. Sin ese número, un delta no se puede leer |
+| EVAL — corridas | [`evals/iterations/`](evals/iterations/) · [`evals/HISTORY.md`](evals/HISTORY.md) | Qué puntaje sacó qué SHA contra qué lock, y qué hallazgo produjo cada deducción |
 | EVAL — jueces | [`.claude/agents/`](.claude/agents/) | Cómo juzga cada persona un backlog. Un agente por persona, derivado de ella; no introduce necesidades nuevas |
 
 ## EVAL
@@ -118,6 +120,19 @@ distinto. **Cada afirmación ocurre una sola vez, en su altitud.**
 
 **Gate: ≥ 8/10.** Se pueden perder dos puntos, no más. Un puntaje por debajo no baja la vara: se
 corrige el backlog y se vuelve a evaluar, en un SHA nuevo.
+
+**El veredicto de cada persona se deriva, no se elige.** El agente llena una tabla de cobertura —una
+fila por paso y por ramo, cada una con su ID, el **título citado textual** y una celda `cubierto` /
+`parcial` / `descubierto`— y cinco reglas en orden producen el veredicto. La duda vive en la celda; el
+veredicto ya no admite ninguna. El agregador vuelve a derivarlo para comprobarlo, y si la tabla y el
+veredicto no coinciden vale la tabla: un agente que deriva mal es una falla del instrumento, no del
+backlog.
+
+**La vara está congelada y es comprobable.** [`evals/rubric.json`](evals/rubric.json) compila la
+rúbrica y [`evals/rubric-lock.sh`](evals/rubric-lock.sh) la resume en un lock que cada corrida anota y
+cada fila del historial lleva: dos filas con lock distinto no son comparables, y ahora eso se ve en
+vez de prometerse. Cuánto se mueve el aparato por su cuenta —el piso de ruido bajo el cual un delta no
+es hallazgo— se mide una vez por lock en [`evals/RUIDO.md`](evals/RUIDO.md).
 
 **Regla de asimetría:** un agente de persona solo puede **restar** de D1, nunca sumar — lee su
 persona y el backlog, así que ve un ángulo y no el conjunto, y si pudiera sumar, D1 mediría la
@@ -165,7 +180,9 @@ son indistinguibles si no se anota.
   `[ASSUMPTION: …]`. Usuario modelo designado y seis tensiones enunciadas.
 - El **aparato de EVAL**: rúbrica, regla de asimetría, protocolo del agente de persona, las tres
   pruebas de cobertura contra un título, los techos duros de D4 y los cuatro rebarridos de
-  propagación.
+  propagación. Y las tres piezas que lo vuelven un instrumento y no una opinión ordenada: el
+  **veredicto derivado** de la tabla de cobertura, el **lock** de la rúbrica y el protocolo del **piso
+  de ruido**.
 - El **método** y el **contrato entre pasos**: qué consume cada paso y qué queda inválido si el
   anterior cambia.
 - La lectura del **ejemplo de clase**, que es de donde sale qué cuenta como iteración del diseño.
@@ -179,8 +196,10 @@ Lo que **no** está, y hay que decirlo así:
   [`HISTORY.md`](evals/HISTORY.md) solo su fila de ejemplo. No hay puntaje.
 - **Ninguna iteración del diseño corrida.** Las dos tablas de
   [`redale/ITERACIONES.md`](redale/ITERACIONES.md) están con guiones, y no hay diagrama.
-- **Los agentes de persona todavía no están los tres.** Sin los tres veredictos, D1 no es
-  computable, y la precondición de la rúbrica prohíbe emitir un total.
+- **El piso de ruido no está medido.** [`evals/RUIDO.md`](evals/RUIDO.md) tiene el protocolo y la
+  tabla vacía: no se puede medir cuánto tiembla el aparato sobre un backlog que no existe. Se mide en
+  la primera corrida con contenido, antes de corregir nada, porque después ya no existe el SHA sobre
+  el que medirlo. Hasta entonces ningún delta entre rondas se puede leer.
 - Los pasos `E`, `D`, `A`, `L` y `E` tienen su README con el contrato y las tablas sin llenar.
 
 ## Proyectos hermanos

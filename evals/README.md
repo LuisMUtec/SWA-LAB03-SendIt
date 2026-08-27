@@ -128,20 +128,45 @@ persona que las sufre.
 
 Cada agente responde, en este orden:
 
-1. **¿Mi flujo principal corre de extremo a extremo, incluido cuando sale mal?** Citando los ítems del
-   backlog por su identificador. Si se corta, decir en qué paso. Un flujo cubierto solo en su camino
-   feliz no aprueba esta pregunta: el *cuando sale mal* de cada persona es parte del flujo.
+1. **¿Mi flujo principal corre de extremo a extremo, incluido cuando sale mal?** Se responde en una
+   **tabla de cobertura**, no en prosa: una fila por paso del flujo y una por cada ramo de *cuando sale
+   mal*. Cada fila lleva el ítem que la sostiene —identificador **y título citado textual**— y una de
+   tres celdas: `cubierto`, `parcial`, `descubierto`. Un flujo cubierto solo en su camino feliz no
+   aprueba esta pregunta: el *cuando sale mal* de cada persona es parte del flujo.
 2. **¿Qué me frustra?** Lo que el backlog decide en mi contra, lo que deja sin decidir para que lo
-   absorba yo, y cualquier título que rompa mis permisos.
-3. **Veredicto.**
+   absorba yo, y cualquier título que rompa mis permisos. Lo último va además en un campo aparte
+   —**permiso roto: sí / no**— porque una regla lo lee.
+3. **Veredicto derivado.** El agente no lo elige: sale de la tabla.
 
-| Veredicto | Resta | Se emite cuando |
-|---|---|---|
-| `Funciona` | 0 | Cada paso del flujo y el *cuando sale mal* están sostenidos por títulos que pasan las tres pruebas |
-| `Funciona con reservas` | 0,5 | El flujo corre entero, pero al menos un paso se sostiene en un título comodín o en cobertura parcial, o el *cuando sale mal* se cubre solo en parte |
-| `No funciona` | 1 | Un paso del flujo principal no lo sostiene ningún título; o el *cuando sale mal* no está cubierto en absoluto; o un título le concede a alguien algo que este archivo de persona declara «nunca debe» |
+### El veredicto se deriva de la tabla, no se elige
 
-**Un veredicto sin cita al backlog es inadmisible y cuenta como `No funciona`.** Una cita a un
+Un agente que lee, razona en prosa y después **elige** entre tres palabras está decidiendo dos cosas a
+la vez —qué vio y cuánto pesa— y solo la primera es la que sabe hacer. La segunda es por donde entra el
+temblor: la misma tabla produce `Funciona con reservas` una ronda y `No funciona` la siguiente sin que
+el backlog se haya movido, y esa diferencia entra en el total indistinguible de una diferencia real.
+
+Así que se parte en dos. El agente decide **celda por celda** —una pregunta chica, con una cita al
+lado— y el veredicto lo produce una regla. **La duda vive en la celda:** entre `cubierto` y `parcial`
+se elige `parcial` y se dice por qué. Lo que deja de existir es la duda sobre el veredicto.
+
+Las reglas se aplican **en este orden** y decide la primera que dispara:
+
+| # | Si | Veredicto | Resta |
+|---|---|---|---|
+| 1 | El campo de permisos dice `sí`: algún ítem le concede a alguien algo que este archivo de persona declara «nunca debe» | `No funciona` | 1 |
+| 2 | Alguna fila de **paso del flujo principal** es `descubierto` | `No funciona` | 1 |
+| 3 | **Todas** las filas de ramo son `descubierto` | `No funciona` | 1 |
+| 4 | Alguna fila es `parcial`, o **alguna** fila de ramo es `descubierto` | `Funciona con reservas` | 0,5 |
+| 5 | Ninguna de las anteriores | `Funciona` | 0 |
+
+La forma compilada de estas reglas está en [`rubric.json`](rubric.json), y es la que entra en el lock.
+
+**La cita sostiene la celda, y se verifica.** Una celda `cubierto` o `parcial` sin identificador **y sin
+el título citado textual** no vale: se cuenta `descubierto`. Un título citado que no aparece literal en
+el backlog tampoco es cita. Esa es la comprobación barata que separa una lectura de un recuerdo, porque
+la decide `grep` y el agente no está en posición de discutirla.
+
+**Un veredicto sin ninguna cita al backlog es inadmisible y cuenta como `No funciona`.** Una cita a un
 identificador que no existe en el backlog tampoco es cita.
 
 **El agente califica en las dos direcciones.** Resta por lo que genuinamente falla, y **no** resta por
@@ -154,6 +179,13 @@ se informan D2, D3 y D4, y el total queda en blanco. No se sustituye el veredict
 criterio del agregador.
 
 ## Cómo puntúa el agregador
+
+**El agregador corre a ciegas del historial.** Mientras puntúa no lee [`HISTORY.md`](HISTORY.md) ni las
+corridas anteriores. Es la misma razón por la que un agente de persona no lee los veredictos ajenos, y
+acá pega más fuerte: un agregador que sabe que la ronda pasada dio 8,0 tiene un número al que volver, y
+el ancla más barata de satisfacer es la que uno mismo puso la vez anterior. Lo que sí lee es la rúbrica
+—esta— y [`rubric.json`](rubric.json), que la compila. El historial se consulta **después** de emitir el
+puntaje, para escribir la fila.
 
 ### D2 — Ajuste al problema · 3 pts
 
@@ -268,19 +300,66 @@ El agregador busca **por nombre** las cuatro variantes que el caso anterior enco
 Cada rebarrido se registra en la corrida **aunque no encuentre nada**. Un rebarrido vacío es un
 resultado; un rebarrido que nadie corrió no lo es, y son indistinguibles si no se anota.
 
+## La rúbrica congelada
+
+La rúbrica no cambia entre rondas, porque si cambiara las filas anteriores de
+[`HISTORY.md`](HISTORY.md) dejarían de ser comparables. Eso estaba escrito y **nada lo comprobaba** —
+y el caso anterior enmendó su propio aparato en plena iteración 01, con las ocho filas siguientes
+midiéndose contra una vara que ya no era la de la primera. Nadie mintió: nadie tenía cómo notarlo.
+
+Ahora se comprueba. La rúbrica tiene una forma compilada, [`rubric.json`](rubric.json) —cuánto vale
+cada dimensión, en qué orden se aplican las reglas, dónde están los techos—, y un script que resume
+las dos mitades en un identificador corto:
+
+```
+$ ./evals/rubric-lock.sh
+sendit-eval v1.0.0 · lock ‹12 hex›
+```
+
+**Cada corrida anota su lock y cada fila del historial lo lleva.** Dos filas con el mismo lock se
+midieron contra la misma vara. Dos filas con lock distinto no son comparables, y quien las compare
+tiene que decir por qué puede.
+
+El lock cubre los **dos** archivos: `rubric.json`, que dice cuánto vale cada cosa, y este README, que
+dice qué mide. Cubrir solo el primero sería dejar abierto el agujero por donde la prosa deriva sin que
+el número se entere — que es la versión de la propagación aplicada a la propia vara.
+
+La consecuencia incómoda se acepta a propósito: **corregir una tilde también mueve el lock.** Nada
+distingue mecánicamente una tilde de un cambio de vara, y la salida barata —un lock que solo cubra la
+aritmética— es exactamente el agujero que se quería tapar. Cuando el cambio fue cosmético se declara
+así en la fila de `HISTORY.md`: *lock movido, sin cambio de vara*. La comparabilidad pasa a descansar
+en una afirmación firmada y auditable, en lugar de descansar en el silencio.
+
+## El piso de ruido
+
+Un delta entre dos rondas no se puede leer sin saber cuánto se mueve el aparato **cuando el backlog no
+se movió**. El protocolo, y el número cuando exista, están en [`RUIDO.md`](RUIDO.md).
+
+La regla que habilita es una sola: **un cambio menor que la resolución del instrumento no se reporta
+como mejora ni como regresión, sino como *sin señal*.** El caso anterior leyó `8,25 → 7,75` como una
+regresión y `8,0 · 8,0 · 8,0` como estabilidad sin haber corrido nunca dos veces el mismo SHA; si el
+aparato tiembla medio punto por su cuenta, esas dos lecturas son la misma y ninguna es un hallazgo.
+
+Se mide **una vez por lock**, no una vez por ronda: el ruido es una propiedad de la vara, no del
+backlog. Cuando el lock se mueve, la medición caduca con él.
+
 ## Cómo se corre una iteración
 
-1. **Congela el estado.** Anota el SHA corto del commit que se evalúa. El puntaje pertenece a ese SHA.
+1. **Congela el estado.** Anota el SHA corto del commit que se evalúa y el **lock** que devuelve
+   `./evals/rubric-lock.sh`. El puntaje pertenece a ese par: sin el SHA no se sabe qué se midió, y sin
+   el lock no se sabe con qué vara.
 2. **Corre los tres agentes de persona**, por separado y aislados entre sí, cada uno contra su archivo
    y el backlog. La coincidencia entre tres lecturas solo es evidencia si son independientes.
-3. **Corre el agregador**: D2 con su censo, D3, D4 con sus techos, y los cuatro rebarridos de
-   propagación por nombre.
+3. **Corre el agregador**, a ciegas del historial: D2 con su censo, D3, D4 con sus techos, y los cuatro
+   rebarridos de propagación por nombre.
 4. **Computa** `D1 = 3 − Σ(deducciones)` y el total sobre 10. Verifica la precondición de los tres
    veredictos antes de emitir cualquier total.
-5. **Escribe** `evals/iterations/AAAA-MM-DD-NN.md` siguiendo [la plantilla](iterations/_TEMPLATE.md).
-6. **Agrega la fila** a [`HISTORY.md`](HISTORY.md), y la iteración a
+5. **Comprueba el lock al terminar** con `./evals/rubric-lock.sh --verify ‹lock›`. Si se movió a mitad
+   de la corrida, la corrida se descarta: se puntuó contra dos varas y no se sabe cuál dio cuál punto.
+6. **Escribe** `evals/iterations/AAAA-MM-DD-NN.md` siguiendo [la plantilla](iterations/_TEMPLATE.md).
+7. **Agrega la fila** a [`HISTORY.md`](HISTORY.md) con su lock, y la iteración a
    [`redale/ITERACIONES.md`](../redale/ITERACIONES.md) si cambió alguna decisión de diseño.
-7. **Si el total es menor que 8: corrige el backlog y vuelve al paso 1.** El backlog cambia; la rúbrica
+8. **Si el total es menor que 8: corrige el backlog y vuelve al paso 1.** El backlog cambia; la rúbrica
    no.
 
 **Medir y corregir no ocurren a la vez.** Las correcciones se aplican **después** de puntuar y quedan

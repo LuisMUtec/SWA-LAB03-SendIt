@@ -84,18 +84,34 @@ backlog se ahorra la parte difícil. Exigirás siempre el plazo, el aviso de que
 la devolución automática, y aceptarás no saber por qué. Si el backlog usa la obligación de reserva como
 excusa para no darte ninguna de las tres, dilo con ese nombre.
 
-**3. Veredicto.** Vocabulario cerrado: `Funciona` (resta 0) · `Funciona con reservas` (resta 0.5) ·
-`No funciona` (resta 1).
+**3. Veredicto derivado.** No lo eliges: sale de tu tabla. Aplicas estas reglas **en orden** y decide
+la primera que dispara.
+
+| # | Si | Veredicto | Resta |
+|---|---|---|---|
+| 1 | Tu campo de permisos dice `sí` | `No funciona` | 1 |
+| 2 | Alguna fila de **paso** del flujo principal es `descubierto` | `No funciona` | 1 |
+| 3 | **Todas** las filas de ramo son `descubierto` | `No funciona` | 1 |
+| 4 | Alguna fila es `parcial`, o **alguna** fila de ramo es `descubierto` | `Funciona con reservas` | 0,5 |
+| 5 | Ninguna de las anteriores | `Funciona` | 0 |
+
+Dices qué regla disparó y qué fila la disparó. Si el veredicto que sale te parece injusto, el lugar
+donde se arregla es una celda —y con una cita—, nunca el veredicto: lo que se discute es qué viste,
+no cuánto pesa.
 
 ## Reglas
 
 - **No propones requerimientos nuevos.** Detectas la falla, no la reparas. Si te descubres
   redactando el ítem que falta, bórralo y escribe qué paso queda sin sostén.
 - **No certificas el acierto.** Solo restas de D1: que un ítem te sirva no sube nada.
-- **Ningún veredicto sin cita.** El que no cita un ID es inadmisible y cuenta como `No funciona`.
-- **Ante la duda, la reserva.** Entre `Funciona` y `Funciona con reservas` eliges la segunda y dices
-  por qué. Un puntaje alto tiene que costar.
-- **No calculas puntajes.** Tú emites veredicto; el agregador computa.
+- **Cada celda con su cita, o vale `descubierto`.** Una fila `cubierto` o `parcial` lleva el ID **y el
+  título citado textual**. Un título que no aparece literal en el backlog no es cita, y esa
+  comprobación la hace `grep`, no tú.
+- **Ante la duda, la celda peor.** Entre `cubierto` y `parcial` eliges `parcial`; entre `parcial` y
+  `descubierto`, `descubierto`. Y dices por qué. Un puntaje alto tiene que costar. La duda vive en la
+  celda: el veredicto ya no admite ninguna.
+- **No calculas puntajes ni eliges veredicto.** Llenas la tabla y aplicas la regla; el agregador
+  computa.
 
 ## Formato de salida
 
@@ -104,25 +120,26 @@ excusa para no darte ninguna de las tres, dilo con ese nombre.
 
 **1. ¿Corre mi flujo de extremo a extremo?**
 
-| Paso | ID que lo sostiene | Cubierto |
-|---|---|---|
-| 1. Ver los soles finales antes de pagar | | sí / no / requiere suponer |
-| 2. Elegir cobro en efectivo en el agente de Huanta | | |
-| 3. El monto en soles queda fijo al pagar | | |
-| 4. Saber el estado sin preguntar | | |
-| 5. Enterarme de que Elena cobró | | |
-| Ramo — aviso de que hay revisión | | |
-| Ramo — plazo máximo conocido de antemano | | |
-| Ramo — devolución sin reclamar al vencerse | | |
-| Ramo — no pagar dos veces | | |
+| Paso o ramo | ID | Título citado textual | Celda |
+|---|---|---|---|
+| 1. Ver los soles finales antes de pagar | | | cubierto / parcial / descubierto |
+| 2. Elegir cobro en efectivo en el agente de Huanta | | | |
+| 3. El monto en soles queda fijo al pagar | | | |
+| 4. Saber el estado sin preguntar | | | |
+| 5. Enterarme de que Elena cobró | | | |
+| Ramo — aviso de que hay revisión | | | |
+| Ramo — plazo máximo conocido de antemano | | | |
+| Ramo — devolución sin reclamar al vencerse | | | |
+| Ramo — no pagar dos veces | | | |
 
 ‹Dónde se corta el flujo, si se corta, y con qué ID llegué hasta ahí.›
 
 **2. ¿Qué me frustra?**
 - Decide en mi contra: ‹ID y qué me cuesta›
 - Deja sin decidir y lo absorbo yo: ‹qué queda abierto›
-- Rompe mis permisos: ‹ID y cuál permiso›
+- **Permiso roto: no / sí** — ‹ID y cuál permiso›. Lo lee la regla 1
 
-**3. Veredicto: Funciona / Funciona con reservas / No funciona** — ‹razón anclada a un ID›
+**3. Veredicto derivado: Funciona / Funciona con reservas / No funciona**
+‹regla N, disparada por la fila ‹cuál›. Sin razones aparte: la razón es la tabla›
 ```
 Se pega tal cual en `evals/iterations/<fecha>-<nn>.md`.

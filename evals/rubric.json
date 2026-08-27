@@ -1,0 +1,170 @@
+{
+  "rubrica": "sendit-eval",
+  "version": "1.0.0",
+  "prosa": "evals/README.md",
+  "que_es_esto": "Forma compilada de la rúbrica. La prosa de README.md dice por qué mide cada cosa; este archivo dice cuánto vale y cómo se computa, sin margen de lectura. Los dos entran en el lock: ver evals/rubric-lock.sh.",
+  "articulo_puntuado": "redale/R-requerimientos/backlog.md",
+  "total": 10,
+  "gate": 8,
+  "redondeo": "ninguno. 7,5 es 7,5 y el gate no se alcanzó",
+  "precondicion": {
+    "regla": "sin los tres veredictos de persona no se emite total",
+    "veredictos_requeridos": [
+      "Rosa",
+      "Elena",
+      "Kevin"
+    ],
+    "si_falta_alguno": "D1 no computable; se informan D2, D3 y D4 y el total queda en blanco",
+    "prohibido": "sustituir el veredicto ausente por el criterio del agregador, estimarlo o promediarlo"
+  },
+  "derivacion_del_veredicto": {
+    "por_que": "el agente llena la tabla de cobertura; el veredicto sale de la tabla. La duda vive en la celda, no en el veredicto.",
+    "entrada": "una fila por paso del flujo principal y una por cada ramo de cuando sale mal, más un campo aparte de permisos (sí/no)",
+    "valores_de_celda": [
+      "cubierto",
+      "parcial",
+      "descubierto"
+    ],
+    "cita": {
+      "obligatoria_en": [
+        "cubierto",
+        "parcial"
+      ],
+      "forma": "ID del ítem + el título citado textual",
+      "verificacion": "el título citado tiene que aparecer literal en el backlog",
+      "si_falla": "la celda vale descubierto"
+    },
+    "reglas_en_orden": [
+      {
+        "si": "el campo de permisos dice sí: algún ítem habilita algo que el archivo de persona declara «nunca debe»",
+        "entonces": "No funciona"
+      },
+      {
+        "si": "alguna fila de paso del flujo principal es descubierto",
+        "entonces": "No funciona"
+      },
+      {
+        "si": "todas las filas de ramo son descubierto",
+        "entonces": "No funciona"
+      },
+      {
+        "si": "alguna fila es parcial, o alguna fila de ramo es descubierto",
+        "entonces": "Funciona con reservas"
+      },
+      {
+        "si": "ninguna de las anteriores",
+        "entonces": "Funciona"
+      }
+    ],
+    "el_agente_no_elige": "emite la tabla y aplica estas reglas; no tiene un veredicto propio que discutir contra ellas"
+  },
+  "dimensiones": {
+    "D1": {
+      "nombre": "Satisfacción de las personas",
+      "puntos": 3,
+      "juzga": "los tres agentes de persona",
+      "asimetria": "solo deducciones; un agente nunca suma",
+      "computo": "3 − Σ(deducciones)",
+      "deducciones": {
+        "Funciona": 0,
+        "Funciona con reservas": 0.5,
+        "No funciona": 1
+      },
+      "vocabulario_cerrado": true,
+      "palabra_fuera_del_vocabulario": "se trata como No funciona y se reporta como defecto de la evaluación"
+    },
+    "D2": {
+      "nombre": "Ajuste al problema",
+      "puntos": 3,
+      "juzga": "agregador",
+      "computo": "1 punto por rasgo",
+      "rasgos": [
+        "cruza una frontera",
+        "cruza una moneda",
+        "termina en efectivo, sin banco, en manos de un tercero"
+      ],
+      "niveles": {
+        "1": "al menos un ítem se vuelve falso si el rasgo desaparece",
+        "0.5": "el rasgo se toca de costado",
+        "0": "nombrado o ausente"
+      },
+      "censo": "se anota con su conteo: cuántos ítems sobreviven intactos a la desaparición de los tres rasgos",
+      "techo": {
+        "condicion": "ninguno o casi ninguno de los ítems cambia al borrar «internacional»",
+        "maximo": 1.5
+      }
+    },
+    "D3": {
+      "nombre": "Cobertura de seguridad y consistencia",
+      "puntos": 2,
+      "juzga": "agregador",
+      "computo": "1 punto cada una",
+      "garantias": [
+        "seguridad",
+        "consistencia"
+      ],
+      "niveles": {
+        "1": "medida o invariante que alguien puede declarar cumplido o incumplido, y el camino de falla cubierto",
+        "0.5": "enunciada como comportamiento, sin medida ni invariante, o solo en el camino feliz",
+        "0": "enunciada como adjetivo o ausente"
+      },
+      "nota": "para la consistencia la forma correcta es casi siempre un invariante; exigir un número donde corresponde un invariante degrada el requerimiento"
+    },
+    "D4": {
+      "nombre": "Coherencia del backlog",
+      "puntos": 2,
+      "juzga": "agregador",
+      "computo": "empieza en 2 y baja 0,25 por hallazgo independiente",
+      "piso": 0,
+      "deduccion_por_hallazgo": 0.25,
+      "hallazgos": [
+        "huérfano",
+        "decisión sin requerimiento",
+        "duplicado encubierto",
+        "título no entendible (comodín)",
+        "ambigüedad no marcada",
+        "título no atómico",
+        "tensión esquivada",
+        "prioridad ausente"
+      ],
+      "techos": [
+        {
+          "condicion": "dos o más de las seis tensiones sin decidir",
+          "maximo": 1.0
+        },
+        {
+          "condicion": "todos los ítems con la misma prioridad",
+          "maximo": 1.5
+        },
+        {
+          "condicion": "los tres agentes devuelven Funciona sin reservas y alguna tensión queda sin decidir",
+          "maximo": 1.0
+        }
+      ],
+      "orden": "los techos se aplican después de las deducciones y no se negocian"
+    }
+  },
+  "pruebas_de_cobertura_de_un_titulo": [
+    {
+      "nombre": "nombra un hecho, no un área",
+      "falla": "título comodín"
+    },
+    {
+      "nombre": "es negable",
+      "falla": "título comodín"
+    },
+    {
+      "nombre": "una sola lectura",
+      "falla": "ambigüedad no marcada"
+    }
+  ],
+  "rebarridos_de_propagacion": {
+    "obligatorios": [
+      "cifra sin productor",
+      "acto sin consumidor",
+      "reparación en la altitud equivocada",
+      "estado sin terminador"
+    ],
+    "regla": "los cuatro se registran en la corrida aunque no encuentren nada"
+  }
+}

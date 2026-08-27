@@ -3,7 +3,12 @@
 Evaluado: [`redale/R-requerimientos/backlog.md`](../../redale/R-requerimientos/backlog.md)
 @ `‹sha-corto›`
 
-Rúbrica: [`evals/README.md`](../README.md). Nada aterrizó a mitad de la corrida / *(o: qué aterrizó)*.
+Rúbrica: [`evals/README.md`](../README.md) · `sendit-eval v‹x.y.z›` · lock `‹12 hex›`, verificado al
+terminar con `./evals/rubric-lock.sh --verify ‹lock›`. Nada aterrizó a mitad de la corrida / *(o: qué
+aterrizó)*.
+
+Piso de ruido vigente para este lock: `‹resolución›` — ver [`RUIDO.md`](../RUIDO.md). Un delta menor
+que ese número contra la ronda anterior se reporta *sin señal*, no como mejora ni como regresión.
 
 ## Puntaje
 
@@ -19,32 +24,60 @@ Rúbrica: [`evals/README.md`](../README.md). Nada aterrizó a mitad de la corrid
 
 ## Veredictos de persona
 
-Los tres agentes corrieron por separado, cada uno contra su archivo de persona y el backlog. Una cita
-por veredicto es obligatoria; sin ella el veredicto es inadmisible y cuenta como `No funciona`.
+Los tres agentes corrieron por separado, cada uno contra su archivo de persona y el backlog. **El
+veredicto no lo eligió el agente: se derivó de su tabla de cobertura** con las cinco reglas en orden
+de la rúbrica, y el agregador volvió a derivarlo para comprobarlo. Cada celda `cubierto` o `parcial`
+lleva su ID **y el título citado textual**; una cita que no aparece literal en el backlog convierte la
+celda en `descubierto`.
+
+Se pega la tabla de cada agente tal cual. Debajo, la regla que disparó.
 
 ### Rosa — `Funciona` / `Funciona con reservas` / `No funciona` (resta X)
 
-- **Flujo principal:** qué ítems lo sostienen paso por paso, citados por identificador — o en qué paso
-  se corta.
-- **Cuando sale mal:** qué ítems cubren la retención sin explicación, el plazo y la devolución — o qué
-  tramo queda descubierto.
+| Paso o ramo | ID | Título citado textual | Celda |
+|---|---|---|---|
+| — | — | — | — |
+
+- **Permiso roto:** no / sí — ‹ID y cuál›
+- **Regla que disparó:** ‹N›, por la fila ‹cuál›
+- **Derivación reverificada por el agregador:** coincide / **no coincide** — ‹qué dijo la tabla y qué
+  escribió el agente; si no coincide vale la tabla y es defecto de la evaluación, no de D1›
+- **Cuando sale mal:** qué ítems cubren la retención sin explicación, el plazo y la devolución — o
+  qué tramo queda descubierto.
 - **Qué me frustra:** —
 - **Comprobado y no deducido:** lo que se revisó y deliberadamente no restó, para que la ausencia de
   deducción sea una decisión y no un olvido.
 
 ### Elena — `Funciona` / `Funciona con reservas` / `No funciona` (resta X)
 
-- **Flujo principal:** —
-- **Cuando sale mal:** el viaje en vano, el documento vencido, los treinta soles de diferencia. —
+| Paso o ramo | ID | Título citado textual | Celda |
+|---|---|---|---|
+| — | — | — | — |
+
+- **Permiso roto:** no / sí — ‹ID y cuál›
+- **Regla que disparó:** ‹N›, por la fila ‹cuál›
+- **Derivación reverificada por el agregador:** coincide / **no coincide** — ‹qué dijo la tabla y qué
+  escribió el agente; si no coincide vale la tabla y es defecto de la evaluación, no de D1›
+- **Cuando sale mal:** el viaje en vano, el documento vencido, los treinta soles de diferencia.
 - **Qué me frustra:** —
-- **Comprobado y no deducido:** —
+- **Comprobado y no deducido:** lo que se revisó y deliberadamente no restó, para que la ausencia de
+  deducción sea una decisión y no un olvido.
 
 ### Kevin — `Funciona` / `Funciona con reservas` / `No funciona` (resta X)
 
-- **Flujo principal:** —
-- **Cuando sale mal:** la operación simultáneamente retenida y pagada. —
+| Paso o ramo | ID | Título citado textual | Celda |
+|---|---|---|---|
+| — | — | — | — |
+
+- **Permiso roto:** no / sí — ‹ID y cuál›
+- **Regla que disparó:** ‹N›, por la fila ‹cuál›
+- **Derivación reverificada por el agregador:** coincide / **no coincide** — ‹qué dijo la tabla y qué
+  escribió el agente; si no coincide vale la tabla y es defecto de la evaluación, no de D1›
+- **Cuando sale mal:** la operación cortada, el reintento, la operación simultáneamente retenida y
+  pagada.
 - **Qué me frustra:** —
-- **Comprobado y no deducido:** —
+- **Comprobado y no deducido:** lo que se revisó y deliberadamente no restó, para que la ausencia de
+  deducción sea una decisión y no un olvido.
 
 `D1 = 3 − Σ(deducciones) = —`
 

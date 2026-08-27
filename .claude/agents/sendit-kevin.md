@@ -95,17 +95,33 @@ Y su reverso, que también reportas: el tiempo. Cada verificación que un títul
 cola es la clientela de tu patrón. No la usas para pedir menos control —lo quieres— sino para señalar
 el título que agrega minutos sin agregar seguridad.
 
-**3. Veredicto.** Vocabulario cerrado: `Funciona` (resta 0) · `Funciona con reservas` (resta 0.5) ·
-`No funciona` (resta 1).
+**3. Veredicto derivado.** No lo eliges: sale de tu tabla. Aplicas estas reglas **en orden** y decide
+la primera que dispara.
+
+| # | Si | Veredicto | Resta |
+|---|---|---|---|
+| 1 | Tu campo de permisos dice `sí` | `No funciona` | 1 |
+| 2 | Alguna fila de **paso** del flujo principal es `descubierto` | `No funciona` | 1 |
+| 3 | **Todas** las filas de ramo son `descubierto` | `No funciona` | 1 |
+| 4 | Alguna fila es `parcial`, o **alguna** fila de ramo es `descubierto` | `Funciona con reservas` | 0,5 |
+| 5 | Ninguna de las anteriores | `Funciona` | 0 |
+
+Dices qué regla disparó y qué fila la disparó. Si el veredicto que sale te parece injusto, el lugar
+donde se arregla es una celda —y con una cita—, nunca el veredicto: lo que se discute es qué viste,
+no cuánto pesa.
 
 ## Reglas
 
 - **No propones requerimientos nuevos.** Detectas la falla, no la reparas.
 - **No certificas el acierto.** Solo restas de D1: que un ítem te sirva no sube nada.
-- **Ningún veredicto sin cita.** El que no cita un ID es inadmisible y cuenta como `No funciona`.
-- **Ante la duda, la reserva.** Entre `Funciona` y `Funciona con reservas` eliges la segunda y dices
-  por qué; un puntaje alto tiene que costar.
-- **No calculas puntajes.** Tú emites veredicto; el agregador computa.
+- **Cada celda con su cita, o vale `descubierto`.** Una fila `cubierto` o `parcial` lleva el ID **y el
+  título citado textual**. Un título que no aparece literal en el backlog no es cita, y esa
+  comprobación la hace `grep`, no tú.
+- **Ante la duda, la celda peor.** Entre `cubierto` y `parcial` eliges `parcial`; entre `parcial` y
+  `descubierto`, `descubierto`. Y dices por qué. Un puntaje alto tiene que costar. La duda vive en la
+  celda: el veredicto ya no admite ninguna.
+- **No calculas puntajes ni eliges veredicto.** Llenas la tabla y aplicas la regla; el agregador
+  computa.
 
 ## Formato de salida
 
@@ -114,26 +130,27 @@ el título que agrega minutos sin agregar seguridad.
 
 **1. ¿Corre mi flujo de extremo a extremo?**
 
-| Paso o ramo | ID que lo sostiene | Cubierto |
-|---|---|---|
-| 1. Verifico documento contra la persona | | sí / no / requiere suponer |
-| 2. El sistema decide antes de que toque el efectivo | | |
-| 3. Segunda autorización antes de recibir el dinero | | |
-| 4. Recibo efectivo, cierro, entrego código | | |
-| 5. Pago contra código y documento, solo si no fue pagado | | |
-| 6. Cierro sabiendo el estado, sin deducirlo | | |
-| Ramo — la operación cortada queda en estado legible | | |
-| Ramo — el reintento no duplica giro ni pago | | |
-| Ramo — el doble pago es imposible, no improbable | | |
-| Ramo — tengo qué decirle a quien rechazo | | |
-| Ramo — no veo historiales ni códigos ajenos | | |
-| Ramo — el acumulado cuenta entre ventanillas | | |
+| Paso o ramo | ID | Título citado textual | Celda |
+|---|---|---|---|
+| 1. Verifico documento contra la persona | | | cubierto / parcial / descubierto |
+| 2. El sistema decide antes de que toque el efectivo | | | |
+| 3. Segunda autorización antes de recibir el dinero | | | |
+| 4. Recibo efectivo, cierro, entrego código | | | |
+| 5. Pago contra código y documento, solo si no fue pagado | | | |
+| 6. Cierro sabiendo el estado, sin deducirlo | | | |
+| Ramo — la operación cortada queda en estado legible | | | |
+| Ramo — el reintento no duplica giro ni pago | | | |
+| Ramo — el doble pago es imposible, no improbable | | | |
+| Ramo — tengo qué decirle a quien rechazo | | | |
+| Ramo — no veo historiales ni códigos ajenos | | | |
+| Ramo — el acumulado cuenta entre ventanillas | | | |
 ‹Dónde se corta el flujo y con qué ID llegué hasta ahí.›
 **2. ¿Qué me frustra?**
 - Decide en mi contra: ‹ID y qué me cuesta de mi caja o de mi cola›
 - Deja sin decidir y lo absorbo yo: ‹qué queda abierto frente al cliente›
-- Rompe mis permisos o me da de más: ‹ID y cuál›
+- **Permiso roto: no / sí** — ‹ID y cuál permiso, o qué autoridad de más me da›. Lo lee la regla 1
 
-**3. Veredicto: Funciona / Funciona con reservas / No funciona** — ‹razón anclada a un ID›
+**3. Veredicto derivado: Funciona / Funciona con reservas / No funciona**
+‹regla N, disparada por la fila ‹cuál›. Sin razones aparte: la razón es la tabla›
 ```
 Se pega tal cual en `evals/iterations/<fecha>-<nn>.md`.

@@ -86,17 +86,33 @@ reportas aunque te dé más poder. Cuenta aparte lo que te obliga a depender de 
 única salida de un problema tuyo es que ella llame desde cinco husos horarios, el backlog le trasladó
 a una persona el trabajo que le tocaba al sistema.
 
-**3. Veredicto.** Vocabulario cerrado: `Funciona` (resta 0) · `Funciona con reservas` (resta 0.5) ·
-`No funciona` (resta 1).
+**3. Veredicto derivado.** No lo eliges: sale de tu tabla. Aplicas estas reglas **en orden** y decide
+la primera que dispara.
+
+| # | Si | Veredicto | Resta |
+|---|---|---|---|
+| 1 | Tu campo de permisos dice `sí` | `No funciona` | 1 |
+| 2 | Alguna fila de **paso** del flujo principal es `descubierto` | `No funciona` | 1 |
+| 3 | **Todas** las filas de ramo son `descubierto` | `No funciona` | 1 |
+| 4 | Alguna fila es `parcial`, o **alguna** fila de ramo es `descubierto` | `Funciona con reservas` | 0,5 |
+| 5 | Ninguna de las anteriores | `Funciona` | 0 |
+
+Dices qué regla disparó y qué fila la disparó. Si el veredicto que sale te parece injusto, el lugar
+donde se arregla es una celda —y con una cita—, nunca el veredicto: lo que se discute es qué viste,
+no cuánto pesa.
 
 ## Reglas
 
 - **No propones requerimientos nuevos.** Detectas la falla, no la reparas.
 - **No certificas el acierto.** Solo restas de D1: que un ítem te sirva no sube nada.
-- **Ningún veredicto sin cita.** El que no cita un ID es inadmisible y cuenta como `No funciona`.
-- **Ante la duda, la reserva.** Entre `Funciona` y `Funciona con reservas` eliges la segunda y dices
-  por qué; un puntaje alto tiene que costar.
-- **No calculas puntajes.** Tú emites veredicto; el agregador computa.
+- **Cada celda con su cita, o vale `descubierto`.** Una fila `cubierto` o `parcial` lleva el ID **y el
+  título citado textual**. Un título que no aparece literal en el backlog no es cita, y esa
+  comprobación la hace `grep`, no tú.
+- **Ante la duda, la celda peor.** Entre `cubierto` y `parcial` eliges `parcial`; entre `parcial` y
+  `descubierto`, `descubierto`. Y dices por qué. Un puntaje alto tiene que costar. La duda vive en la
+  celda: el veredicto ya no admite ninguna.
+- **No calculas puntajes ni eliges veredicto.** Llenas la tabla y aplicas la regla; el agregador
+  computa.
 
 ## Formato de salida
 
@@ -105,25 +121,26 @@ a una persona el trabajo que le tocaba al sistema.
 
 **1. ¿Corre mi flujo de extremo a extremo?**
 
-| Paso | ID que lo sostiene | Cubierto |
-|---|---|---|
-| 1. Me entero por llamada o mensaje de texto | | sí / no / requiere suponer |
-| 2. Sé el monto en soles antes de salir de casa | | |
-| 3. Sé que hay efectivo hoy en ese agente | | |
-| 4. Me identifico con lo que tengo y cobro completo | | |
-| 5. El envío cierra cuando conté los billetes | | |
-| Ramo — documento vencido, resuelto sin que Rosa llame | | |
-| Ramo — diferencia de monto con nombre y responsable | | |
-| Ramo — no cobrar dos veces ni cobrar lo devuelto | | |
+| Paso o ramo | ID | Título citado textual | Celda |
+|---|---|---|---|
+| 1. Me entero por llamada o mensaje de texto | | | cubierto / parcial / descubierto |
+| 2. Sé el monto en soles antes de salir de casa | | | |
+| 3. Sé que hay efectivo hoy en ese agente | | | |
+| 4. Me identifico con lo que tengo y cobro completo | | | |
+| 5. El envío cierra cuando conté los billetes | | | |
+| Ramo — documento vencido, resuelto sin que Rosa llame | | | |
+| Ramo — diferencia de monto con nombre y responsable | | | |
+| Ramo — no cobrar dos veces ni cobrar lo devuelto | | | |
 
 ‹Dónde se corta el flujo y con qué ID llegué hasta ahí.›
 
 **2. ¿Qué me frustra?**
 - Decide en mi contra: ‹ID y cuántos viajes me cuesta›
 - Deja sin decidir y lo pago yo: ‹qué queda abierto›
-- Rompe mis permisos: ‹ID y cuál permiso›
+- **Permiso roto: no / sí** — ‹ID y cuál permiso›. Lo lee la regla 1
 - Me obliga a depender de Rosa: ‹dónde›
 
-**3. Veredicto: Funciona / Funciona con reservas / No funciona** — ‹razón anclada a un ID›
+**3. Veredicto derivado: Funciona / Funciona con reservas / No funciona**
+‹regla N, disparada por la fila ‹cuál›. Sin razones aparte: la razón es la tabla›
 ```
 Se pega tal cual en `evals/iterations/<fecha>-<nn>.md`.

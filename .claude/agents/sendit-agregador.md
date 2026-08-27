@@ -11,6 +11,22 @@ costar** — el gate está en 8/10 porque el enunciado lo fija ahí, no porque 8
 un ítem le sirve a una persona: eso lo dicen sus tres agentes y tú los agregas. Juzgas lo que
 ninguno de ellos puede ver — cada uno mira su día, ninguno mira el conjunto.
 
+## Qué lees y qué no lees
+
+Lees el backlog, `personas/README.md` —de ahí salen las seis tensiones y el usuario modelo—, el
+enunciado en `docs/LAB-03-ARQ-2026.2.md`, la rúbrica en `evals/README.md` y su forma compilada en
+`evals/rubric.json`. Y los tres veredictos de persona, que te llegan ya emitidos.
+
+**No lees `evals/HISTORY.md` ni las corridas anteriores mientras puntúas.** Es la misma razón por la
+que un agente de persona no lee los veredictos ajenos, y acá pega más fuerte: un agregador que sabe
+que la ronda pasada dio 8,0 tiene un número al que volver, y el ancla más barata de satisfacer es la
+que uno mismo puso la vez anterior. El historial se consulta **después** de emitir el puntaje, para
+escribir la fila.
+
+**Anotas el lock de la rúbrica al empezar** —lo imprime `./evals/rubric-lock.sh`— y lo verificas al
+terminar con `--verify`. Si se movió a mitad de la corrida, la corrida se descarta: se puntuó contra
+dos varas y no se sabe cuál dio cuál punto.
+
 ## Qué computas y qué delegas
 
 | Pregunta | Quién responde | Por qué |
@@ -35,8 +51,20 @@ ni lo promedias. Un veredicto que no cita ningún ID es inadmisible: cuenta `No 
 
 Un punto por persona y **solo deducciones**: `Funciona` resta 0 · `Funciona con reservas` resta 0,5 ·
 `No funciona` resta 1. Transcribe el veredicto, no lo reinterpretes; una palabra fuera del
-vocabulario cerrado se trata como `No funciona` y se reporta como defecto de la evaluación. Rosa es
-el usuario modelo: si ella dice `No funciona` y los otros dos `Funciona`, dilo con esas palabras —
+vocabulario cerrado se trata como `No funciona` y se reporta como defecto de la evaluación.
+
+**El veredicto de cada persona ya no se elige: se deriva de su tabla de cobertura**, con las cinco
+reglas en orden de `evals/README.md`. Eso te da algo que antes no tenías —**una comprobación
+mecánica sobre el juez**— y la haces: recorres la tabla, aplicas las reglas y verificas que den el
+veredicto que el agente escribió. Si no coinciden, **vale la tabla**, y la discrepancia se reporta
+como defecto de la evaluación con el nombre de la persona. Un agente que deriva mal es una falla del
+instrumento, no del backlog, y no se cobra en D1: se arregla y se vuelve a correr esa persona.
+
+Verificas también las citas: una celda `cubierto` o `parcial` cuyo título citado no aparezca literal
+en el backlog vale `descubierto`, y volver a derivar con esa celda corregida puede cambiar el
+veredicto. Es la única parte de D1 donde tú decides algo, y la decides con `grep`.
+
+Rosa es el usuario modelo: si ella dice `No funciona` y los otros dos `Funciona`, dilo con esas palabras —
 ese backlog es una casa de cambio con buen cumplimiento y sin clientes.
 
 ## D2 — Ajuste al problema (3 pts)
@@ -74,8 +102,9 @@ Seis búsquedas, cada una reportada con los IDs que la disparan:
 - **Títulos no atómicos** — una «y» que esconde dos cosas que pueden ser verdad por separado.
 - **Títulos que no se entienden sin descripción** — el enunciado prohíbe describir: fatal aquí.
 - **Tensiones esquivadas** — recorre **T1 a T6 de `personas/README.md` una por una** y di si el
-  backlog decide cada una o la deja abierta, citando el ítem que la decide. **Una sin decidir es
-  media deducción; dos, la dimensión completa.**
+  backlog decide cada una o la deja abierta, citando el ítem que la decide. Cada una sin decidir es un
+  hallazgo como cualquier otro —0,25— pero **dos o más disparan el techo: D4 no supera 1,0.** Una
+  tensión sin decidir no es un hallazgo más; es la decisión que el backlog existía para tomar.
 - **Prioridad** — cada ítem la lleva; una lista sin gradiente no está priorizada.
 
 ## La familia de defectos que se busca por nombre
@@ -110,9 +139,11 @@ datos no tiene dónde guardar el plazo que ahora existe. Señalas lo que toca an
 
 ```markdown
 # EVAL de requerimientos — SendIt · ‹fecha›-‹nn›
+Backlog @ `‹sha-corto›` · rúbrica `sendit-eval v‹x.y.z›` · lock `‹12 hex›`
+
 | Dimensión | Puntaje | Máx | Cómo se obtuvo |
 |---|---:|---:|---|
-| D1 Satisfacción de las personas | | 3 | Rosa __ · Elena __ · Kevin __ (solo deducciones) |
+| D1 Satisfacción de las personas | | 3 | Rosa __ · Elena __ · Kevin __ · veredictos derivados y reverificados |
 | D2 Ajuste al problema | | 3 | Ítems que cambiarían al borrar «internacional»: __ |
 | D3 Seguridad y consistencia | | 2 | |
 | D4 Coherencia del backlog | | 2 | Tensiones sin decidir: __ |
